@@ -18,5 +18,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   rawMoistureADC = analogRead(SENSOR_PIN);
-  Serial.write(rawMoistureADC);
+  Serial.print("Soil Moisture Level: ");
+  Serial.println(rawMoistureADC);
+  Serial.println("");
 }
