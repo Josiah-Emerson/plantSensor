@@ -13,15 +13,19 @@ char pass[] = "josiahE1";
 
 BlynkTimer timer;
 
+// End of blynk stuff
 
-// moisture
+
+
 #define SENSOR_PIN 35
 #define PUMP_PIN 17
 int rawMoistureADC; // analog input for moisture
+bool botanistMode;
 
 // function declarations
 void sendMoisture();
 void moisturAndPumpSetup();
+void botanistModeSetup();
 
 void setup() {
   M5.begin();
@@ -31,6 +35,7 @@ void setup() {
   timer.setInterval(5000L, sendMoisture);
 
   moistureAndPumpSetup();
+  botanistModeSetup();
   
 }
 
@@ -62,6 +67,9 @@ void loop() {
     delay(5000);
   }
 
+  Serial.print("Botanist Mode: ");
+  Serial.println(botanistMode);
+  delay(2500);
 }
 
 void moistureAndPumpSetup(){
@@ -69,14 +77,20 @@ void moistureAndPumpSetup(){
   pinMode(PUMP_PIN, OUTPUT);
 }
 
+void botanistModeSetup(){
+  botanistMode = false;
+  Blynk.virtualWrite(1, 0);
+}
+
 BLYNK_WRITE(V1){
-  if(param.asInt() == 1){
-    // turn pump on
-    digitalWrite(PUMP_PIN, true);
+  if(param.asInt() ==1){
+    // Botanist Mode ON
+    botanistMode = true;
   }else{
-    // turn off pump
-    digitalWrite(PUMP_PIN, false);
+    // Botanist Mode OFF
+    botanistMode = false;
   }
+
 }
 
 void sendMoisture(){
