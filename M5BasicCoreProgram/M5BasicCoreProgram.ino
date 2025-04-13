@@ -20,12 +20,17 @@ BlynkTimer timer;
 #define SENSOR_PIN 35
 #define PUMP_PIN 17
 int rawMoistureADC; // analog input for moisture
+const int moistureThreshold = 2000; // NOTE: lower means more moisture
 bool botanistMode;
 
 // function declarations
 void sendMoisture();
 void moisturAndPumpSetup();
 void botanistModeSetup();
+
+
+
+// * * * * * SETUP * * * * * 
 
 void setup() {
   M5.begin();
@@ -40,6 +45,7 @@ void setup() {
 }
 
 
+// * * * * * LOOP * * * * * 
 
 void loop() {
   M5.update();
@@ -69,8 +75,32 @@ void loop() {
 
   Serial.print("Botanist Mode: ");
   Serial.println(botanistMode);
+
+  rawMoistureADC = analogRead(SENSOR_PIN);
+  Serial.print("Current reading: ");
+  Serial.println(rawMoistureADC);
+
+  if(rawMoistureADC > moistureThreshold){ 
+    // Too dry (Remember higher val is drier from experiments)
+    Serial.println("Soil is too dry");   
+    if(!botanistMode){
+      Serial.println("Pumping for 5 sec... ");
+      digitalWrite(PUMP_PIN, true);
+      delay(5000);
+      digitalWrite(PUMP_PIN, false);
+    }else{
+      Serial.println("Not pumping (in botanist mode)");
+    }
+  }
+
+  Serial.println("* * * * * * * * * * * * * * * * * * * * * * * * * *");
   delay(2500);
 }
+
+
+
+
+// * * * * * FUNCTIONS * * * * *
 
 void moistureAndPumpSetup(){
   pinMode(SENSOR_PIN, INPUT);
