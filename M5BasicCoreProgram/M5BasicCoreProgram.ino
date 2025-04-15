@@ -8,8 +8,8 @@
 #include <WiFiClientSecure.h>
 #include <BlynkSimpleEsp32_SSL.h>
 
-char ssid[] = "Josiah Phone";
-char pass[] = "josiahE1";
+char ssid[] = "APU-BYOD";
+char pass[] = "chaffy-intertwining-NyAC";
 
 BlynkTimer timer;
 
@@ -19,8 +19,14 @@ BlynkTimer timer;
 
 #define SENSOR_PIN 35
 #define PUMP_PIN 17
+
+// must be in microseconds... 1 second = 1e6 us
+#define DEEP_SLEEP_DURATION 5e6
+
 int rawMoistureADC; // analog input for moisture
-const int moistureThreshold = 2000; // NOTE: lower means more moisture
+// The value was mostly around 1660-1680 when first bought
+// Test week or two later to see what it should be at
+const int moistureThreshold = 1800; // NOTE: lower means more moisture
 bool botanistMode;
 
 // function declarations
@@ -33,15 +39,30 @@ void botanistModeSetup();
 // * * * * * SETUP * * * * * 
 
 void setup() {
+  delay(1000);
   M5.begin();
   Serial.begin(9600);
-  delay(25);
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
-  timer.setInterval(5000L, sendMoisture);
 
+  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+  if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0){
+    Serial.println("Woke up by button");
+    M5.Lcd.println("Woke up by button");
+  }else if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER){
+    Serial.println("Woke up by timer");
+    M5.Lcd.println("Woke up by timer");
+  }
+  
   moistureAndPumpSetup();
   botanistModeSetup();
   
+
+  Serial.println("Going to sleep...");
+  M5.Lcd.println("Going to sleep...");
+  delay(500);
+  esp_sleep_enable_timer_wakeup(DEEP_SLEEP_DURATION);
+  esp_sleep_enable_ext0_wakeup((gpio_num_t) BUTTON_A_PIN, 0);
+  esp_deep_sleep_start();
 }
 
 
