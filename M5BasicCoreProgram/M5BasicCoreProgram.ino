@@ -103,7 +103,6 @@ void loop() {
 
 void takeMeasurements(){
   // *  *  *  *  *  M O I S T U R E  &  P U M P  *  *  *  *  *
-  pinMode(SENSOR_PIN, HIGH);
   pinMode(SENSOR_PIN, INPUT);
   pinMode(PUMP_PIN, OUTPUT);
   
@@ -181,6 +180,8 @@ void npk(){
     }
   }
 }
+
+
 void botanistModeSetup(){
   Blynk.syncVirtual(V1);
   Serial.print("Botanist mode: ");
